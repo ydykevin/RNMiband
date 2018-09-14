@@ -172,21 +172,12 @@ export default class App extends Component {
   getActivityData(){
 
     var time    = new Date();
-    //var hour    = time.getHours();
-    //var minute  = time.getMinutes();
-    var hour    = 17;
+    var hour    = 14;
     var minute  = 30;
     time.setHours(hour);
     time.setMinutes(minute);
 
-
-    // RNMiband.getActivityData(time);
-    // this.actData = [];
-    // this.actData.push(['Time','Kind','Intensity','Step']);
-    // setInterval(()=>{
-    //   this.actData = RNMiband.actData;
-    //   this.forceUpdate();
-    // },1000);
+    this.actData = [];
 
     RNMiband.getActivityData(time).then((actData)=>{
       this.actData = actData;
@@ -195,20 +186,21 @@ export default class App extends Component {
     });
   }
 
-  getActivityDataRange(startDate,endDate){
+  getActivityDataRange(){
 
     var startDate  = new Date();
-    var startHour    = 17;
+    var startHour    = 14;
     var startMinute  = 30;
     startDate.setHours(startHour);
     startDate.setMinutes(startMinute);
 
     var endDate  = new Date();
-    var endHour    = 17;
+    var endHour    = 14;
     var endMinute  = 40;
     endDate.setHours(endHour);
     endDate.setMinutes(endMinute);
 
+    this.actData = [];
 
     RNMiband.getActivityDataRange(startDate,endDate).then((actData)=>{
       this.actData = actData;
@@ -223,15 +215,9 @@ export default class App extends Component {
 
     return (
       <View style={styles.container}>
-        <TouchableHighlight style={{marginTop: 30,margin: 20, padding:10, backgroundColor:'#ccc'}} onPress={() => this.startScan() }>
-          <Text>Scan Bluetooth</Text>
+        <TouchableHighlight style={{marginTop: 40,margin: 20, padding:10, backgroundColor:'#ccc'}} onPress={() => this.startScan() }>
+          <Text style={{textAlign: 'center'}}>Scan Bluetooth</Text>
         </TouchableHighlight>
-        <TouchableHighlight style={{marginTop: 0,margin: 20, padding:10, backgroundColor:'#ccc'}} onPress={() => this.disconnect() }>
-          <Text>Disconnect</Text>
-        </TouchableHighlight>
-        {/* <TouchableHighlight style={{marginTop: 0,margin: 20, padding:10, backgroundColor:'#ccc'}} onPress={() => this.retrieveConnected() }>
-          <Text>Retrieve connected peripherals</Text>
-        </TouchableHighlight> */}
         <ScrollView style={styles.scroll}>
           {(list.length == 0) &&
             <View style={{flex:1, margin: 20}}>
@@ -254,6 +240,26 @@ export default class App extends Component {
             }}
           />
         </ScrollView>
+        <View style={styles.twoView}>
+          <TouchableHighlight style={styles.buttonLeft} onPress={() => this.getBatteryLevel() }>
+            <Text style={{textAlign:'center'}}>Get Battery Level</Text>
+          </TouchableHighlight>
+          <TouchableHighlight style={styles.buttonRight} onPress={() => this.disconnect() }>
+            <Text style={{textAlign:'center'}}>Disconnect</Text>
+          </TouchableHighlight>
+        </View>
+        <View style={styles.twoView}>
+          <Text style={{flex:1,marginRight:10}}>Battery: {this.battery}</Text>
+          <Text style={{flex:1,marginLeft:10}}>Connected: {this.connected?'Yes':'No'}</Text>
+        </View>
+        <View style={styles.twoView}>
+          <TouchableHighlight style={styles.buttonLeft} onPress={() => this.getActivityData() }>
+            <Text style={{textAlign:'center'}}>Get Act Data</Text>
+          </TouchableHighlight>
+          <TouchableHighlight style={styles.buttonRight} onPress={() => this.getActivityDataRange() }>
+            <Text style={{textAlign:'center'}}>Get Act Data Range</Text>
+          </TouchableHighlight>
+        </View>
         <ScrollView style={styles.scroll}>
           <ScrollView  horizontal = {true} showsHorizontalScrollIndicator= {false}>
             <View>
@@ -273,18 +279,6 @@ export default class App extends Component {
             </View>
           </ScrollView>
         </ScrollView>
-        <View style={{height:50, flexDirection: 'row'}}>
-          <TouchableHighlight style={{marginTop: 0,margin: 10, padding:10, backgroundColor:'#ccc'}} onPress={() => this.getBatteryLevel() }>
-            <Text>Battery Level</Text>
-          </TouchableHighlight>
-          <TouchableHighlight style={{marginTop: 0,margin: 10, padding:10, backgroundColor:'#ccc'}} onPress={() => this.getActivityData() }>
-            <Text>Act Data</Text>
-          </TouchableHighlight>
-          <TouchableHighlight style={{marginTop: 0,margin: 10, padding:10, backgroundColor:'#ccc'}} onPress={() => this.getActivityDataRange() }>
-            <Text>Range Data</Text>
-          </TouchableHighlight>
-        </View>
-        <View style={{height:20,margin:10}}><Text>Battery: {this.battery} Connection: {this.connected?'Connected':'Not connected'}</Text></View>
       </View>
     );
   }
@@ -300,9 +294,27 @@ const styles = StyleSheet.create({
   scroll: {
     flex: 1,
     backgroundColor: '#f0f0f0',
-    margin: 10,
+    margin: 20,
+    marginTop: 0
   },
   row: {
     margin: 10
   },
+  twoView: {
+    marginTop: 0,
+    margin: 20,
+    flexDirection: 'row',
+  },
+  buttonLeft: {
+    flex:1,
+    padding:10, 
+    backgroundColor:'#ccc',
+    marginRight: 10,
+  },
+  buttonRight: {
+    flex:1,
+    padding:10, 
+    backgroundColor:'#ccc',
+    marginLeft: 10,
+  }
 });

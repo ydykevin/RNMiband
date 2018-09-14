@@ -63,24 +63,10 @@ const AB = function() {
 
 class RNMiband{
   constructor(){
-    //super();
 
-    // this.state = {
-    //   scanning:false,
-    //   peripherals: new Map(),
-    //   appState: '',
-    //   lastSyncMin: new Date(),
-    // }
     this.peripherals = new Map();
 
-    //this.startScan = this.startScan.bind(this);
-    //this.handleDiscoverPeripheral = this.handleDiscoverPeripheral.bind(this);
-    //this.handleStopScan = this.handleStopScan.bind(this);
-
-    
     this.handleUpdateValueForCharacteristic = this.handleUpdateValueForCharacteristic.bind(this);
-    //this.handleDisconnectedPeripheral = this.handleDisconnectedPeripheral.bind(this);
-    //this.handleAppStateChange = this.handleAppStateChange.bind(this);
 
     this.key = [0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39,0x40,0x41,0x42,0x43,0x44,0x45];
     this.actData = [];
@@ -124,64 +110,6 @@ class RNMiband{
       });
     });
   }
-
-  // componentDidMount() {
-  //   AppState.addEventListener('change', this.handleAppStateChange);
-
-  //   BleManager.start({showAlert: false});
-
-    
-  //   this.handlerDiscover = bleManagerEmitter.addListener('BleManagerDiscoverPeripheral', this.handleDiscoverPeripheral );
-  //   this.handlerStop = bleManagerEmitter.addListener('BleManagerStopScan', this.handleStopScan );
-  //   this.handlerDisconnect = bleManagerEmitter.addListener('BleManagerDisconnectPeripheral', this.handleDisconnectedPeripheral );
-  //   this.handlerUpdate = bleManagerEmitter.addListener('BleManagerDidUpdateValueForCharacteristic', this.handleUpdateValueForCharacteristic );
-
-  //   if (Platform.OS === 'android' && Platform.Version >= 23) {
-  //       PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION).then((result) => {
-  //           if (result) {
-  //             console.log("Permission is OK");
-  //           } else {
-  //             PermissionsAndroid.requestPermission(PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION).then((result) => {
-  //               if (result) {
-  //                 console.log("User accept");
-  //               } else {
-  //                 console.log("User refuse");
-  //               }
-  //             });
-  //           }
-  //     });
-  //   }
-
-  // }
-
-  // handleAppStateChange(nextAppState) {
-  //   if (this.appState.match(/inactive|background/) && nextAppState === 'active') {
-  //     console.log('App has come to the foreground!')
-  //     BleManager.getConnectedPeripherals([]).then((peripheralsArray) => {
-  //       console.log('Connected peripherals: ' + peripheralsArray.length);
-  //     });
-  //   }
-  //   this.appState = nextAppState;
-  // }
-
-  // componentWillUnmount() {
-  //   this.handlerDiscover.remove();
-  //   this.handlerStop.remove();
-  //   this.handlerDisconnect.remove();
-  //   this.handlerUpdate.remove();
-  // }
-
-  // handleDisconnectedPeripheral(data) {
-  //   this.cleanData();
-  //   let peripherals = this.peripherals;
-  //   let peripheral = peripherals.get(data.peripheral);
-  //   if (peripheral) {
-  //     peripheral.connected = false;
-  //     peripherals.set(peripheral.id, peripheral);
-  //     this.peripherals = peripherals;
-  //   }
-  //   console.log('Disconnected from ' + data.peripheral);
-  // }
 
   handleUpdateValueForCharacteristic(data) {
     console.log('Data Update at: ' + data.peripheral + ' characteristic: ' + data.characteristic + ' data: '+ data.value);
@@ -227,12 +155,6 @@ class RNMiband{
     }
   
   }
-
-  // cleanData() {
-  //   this.actData = [['Time','Kind','Intensity','Step']];
-  //   this.battery = '';
-  //   this.forceUpdate();
-  // }
 
   handleStopScan() {
     console.log('Scan is stopped');
@@ -484,67 +406,6 @@ class RNMiband{
 
   }
 
-  // render() {
-  //   const list = Array.from(this.state.peripherals.values());
-  //   const dataSource = ds.cloneWithRows(list);
-  //   const arr = Array.from([1,2,3,4,5,6,7,8,9,0]);
-  //   const dataList = ds.cloneWithRows(arr);
-
-    
-
-  //   return (
-  //     <View style={styles.container}>
-  //       <TouchableHighlight style={{marginTop: 40,margin: 20, padding:20, backgroundColor:'#ccc'}} onPress={() => this.startScan() }>
-  //         <Text>Scan Bluetooth ({this.state.scanning ? 'on' : 'off'})</Text>
-  //       </TouchableHighlight>
-  //       <TouchableHighlight style={{marginTop: 0,margin: 20, padding:20, backgroundColor:'#ccc'}} onPress={() => this.retrieveConnected() }>
-  //         <Text>Retrieve connected peripherals</Text>
-  //       </TouchableHighlight>
-  //       <ScrollView style={styles.scroll}>
-  //         {(list.length == 0) &&
-  //           <View style={{flex:1, margin: 20}}>
-  //             <Text style={{textAlign: 'center'}}>No peripherals</Text>
-  //           </View>
-  //         }
-  //         <ListView
-  //           enableEmptySections={true}
-  //           dataSource={dataSource}
-  //           renderRow={(item) => {
-  //             const color = item.connected ? 'green' : '#fff';
-  //             return (
-  //               <TouchableHighlight onPress={() => this.test(item) }>
-  //                 <View style={[styles.row, {backgroundColor: color}]}>
-  //                   <Text style={{fontSize: 12, textAlign: 'center', color: '#333333', padding: 10}}>{item.name}</Text>
-  //                   <Text style={{fontSize: 8, textAlign: 'center', color: '#333333', padding: 10}}>{item.id}</Text>
-  //                 </View>
-  //               </TouchableHighlight>
-  //             );
-  //           }}
-  //         />
-  //       </ScrollView>
-  //       <ScrollView style={styles.scroll}>
-  //         <ScrollView  horizontal = {true} showsHorizontalScrollIndicator= {false}>
-  //               <View>
-  //                 {
-  //                   this.actData.map((eachRow,j) => {
-  //                         return (
-  //                           <View style={{flexDirection:'row'}} key = {j}>
-  //                               {
-  //                                 eachRow.map((eachItem,i) => {
-  //                                   return <View key = {i} style={{width:i==0?150:70,height:40,backgroundColor:((j%2)?'white':'#ccc'),alignItems:'center',justifyContent:'center'}}><Text>{eachItem}</Text></View>
-  //                                 })
-  //                               }
-  //                           </View>
-  //                         );
-  //                     })
-  //                 }
-  //               </View>
-  //           </ScrollView>
-  //       </ScrollView>
-  //       <View style={{height:20,margin:10}}><Text>Battery: {this.battery}</Text></View>
-  //     </View>
-  //   );
-  // }
 }
 
 const styles = StyleSheet.create({
