@@ -19,6 +19,7 @@ import {
 import BleManager from 'react-native-ble-manager';
 import { Buffer } from 'buffer';
 import crypto from 'react-native-crypto';
+//import textDecoder from 'text-encoding';
 
 const window = Dimensions.get('window');
 //const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
@@ -26,14 +27,19 @@ const window = Dimensions.get('window');
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
-const UUID_BASE = (x) => `0000${x}-0000-3512-2118-0009AF100700`;
-const miband2_service    = 'FEE1';
-const miband_service     = 'FEE0';
-const deviceInfo_service = '180A';
-const act      = UUID_BASE('0004');
-const act_data = UUID_BASE('0005');
-const batt     = UUID_BASE('0006');
-const auth     = UUID_BASE('0009');
+const UUID_BASE       = (x) => `0000${x}-0000-3512-2118-0009AF100700`;
+//const UUID_BASE_ALERT = (x) => `0000${x}-0000-1000-8000-00805f9b34fb`;
+const miband_service    = 'FEE0';
+const miband2_service   = 'FEE1';
+const alert_service_1   = '1811';
+const alert_service_2   = '1802';
+const act       = UUID_BASE('0004');
+const act_data  = UUID_BASE('0005');
+const batt      = UUID_BASE('0006');
+const step_data = UUID_BASE('0007');
+const auth      = UUID_BASE('0009');
+const alert1    = `2A46`;
+const alert2    = `2A06`;
 
 const AB = function() {
   var args = [...arguments];
@@ -74,6 +80,8 @@ class RNMiband{
     this.finalTime;
     this.endDate;
     this.lastSyncMin;
+    this.actDataDone = false;
+    this.finding = false;
 
     console.log('RNMiband con done');
   }
@@ -150,8 +158,12 @@ class RNMiband{
         });
       }
     } else if (data.characteristic.toUpperCase() === act_data){
-
       this.updateActData(data);
+    } else if (data.characteristic.toUpperCase() === act) {
+      var cmd = Buffer.from(data.value).slice(0,3).toString('hex');
+      if (cmd === '100201') {
+        this.actDataDone = true;
+      }
     }
   
   }
@@ -259,10 +271,63 @@ class RNMiband{
       } else {
         BleManager.read(this.peripheral,miband_service,batt).then((data)=>{
           var battery = data[1]+'%';
-          //console.log('battery:?? '+battery);
           fulfill(battery);
         });
       }
+    });
+  }
+
+  getStepData(){
+    return new Promise((fulfill, reject) => {
+      if (!this.peripheral) {
+        reject('No device connected.');
+      } else {
+        BleManager.read(this.peripheral,miband_service,step_data).then((data)=>{
+          var buffer = Buffer.from(data);
+          var stepData = [];
+          stepData.push(buffer.readUInt16LE(1));
+          stepData.push(buffer.readUInt32LE(5));
+          stepData.push(buffer.readUInt32LE(9));
+          //console.log('Step: '+step+' distance: '+distance+' calories: '+calories);
+          fulfill(stepData);
+        });
+      }
+    });
+  }
+
+  findDevice(){
+    if (!this.peripheral) {
+      return;
+    } else {
+      this.finding = true;
+      this.doFindDevice();
+      var findingDevice = setInterval(()=>{
+        if(!this.finding){
+          clearInterval(findingDevice);
+        }
+        BleManager.writeWithoutResponse(this.peripheral, alert_service_1, alert1, [0x05,0x01,0x59,0x6f,0x75,0x20,0x66,0x6f,0x75,0x6e,0x64,0x20,0x69,0x74,0x21]).then(() => {
+        }).catch((error)=>{
+          console.log('Writing error', error);
+        });
+        this.doFindDevice();
+      },5000);
+    }
+  }
+
+  stopFindingDevice(){
+    this.finding = false;
+  }
+
+  doFindDevice(){
+    BleManager.retrieveServices(this.peripheral).then(() => {
+      BleManager.writeWithoutResponse(this.peripheral, alert_service_1, alert1, [0x05,0x01]).then(() => {
+        BleManager.writeWithoutResponse(this.peripheral, alert_service_2, alert2, [0xff,0x2c,0x01,0x58,0x02,0x03]).then(() => {
+        }).catch((error)=>{
+          console.log('Writing error', error);
+        });
+      }).catch((error)=>{
+        console.log('Writing error', error);
+      });
     });
   }
 
@@ -376,9 +441,14 @@ class RNMiband{
 
     return new Promise((fulfill, reject) => {
       var waitForActData = setInterval(()=>{
-        if(this.lastSyncMin.getTime()+2000>=this.finalTime.getTime()){
-          fulfill(this.actData);
+        // if(this.lastSyncMin.getTime()+2000>=this.finalTime.getTime()){
+        //   fulfill(this.actData);
+        //   clearInterval(waitForActData);
+        // }
+        if(this.actDataDone){
+          this.actDataDone = false;
           clearInterval(waitForActData);
+          fulfill(this.actData);
         }
       },1000);
     });
@@ -397,9 +467,14 @@ class RNMiband{
 
     return new Promise((fulfill, reject) => {
       var waitForActDataRange = setInterval(()=>{
-        if(this.lastSyncMin.getTime()+1000>=endDate.getTime()){
-          fulfill(this.actData);
+        // if(this.lastSyncMin.getTime()+1000>=endDate.getTime()){
+        //   fulfill(this.actData);
+        //   clearInterval(waitForActDataRange);
+        // }
+        if(this.actDataDone){
+          this.actDataDone = false;
           clearInterval(waitForActDataRange);
+          fulfill(this.actData);
         }
       },1000);
     });
@@ -407,22 +482,5 @@ class RNMiband{
   }
 
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFF',
-    width: window.width,
-    height: window.height
-  },
-  scroll: {
-    flex: 1,
-    backgroundColor: '#f0f0f0',
-    margin: 10,
-  },
-  row: {
-    margin: 10
-  },
-});
 
 module.exports = new RNMiband();

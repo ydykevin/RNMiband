@@ -40,7 +40,7 @@ export default class App extends Component {
     this.connected = false;
     this.actData.push(['Time','Kind','Intensity','Step']);
     this.battery = '';
-    
+    this.stepData = '';
   }
 
   componentDidMount() {
@@ -88,13 +88,6 @@ export default class App extends Component {
     }
   }
 
-  // handleStopScan() {
-  //   console.log('Scan is stopped');
-  //   this.setState({ scanning: false });
-  // }
-
-  
-
   handleDisconnectedPeripheral(data) {
     this.cleanData();
     let peripherals = this.state.peripherals;
@@ -120,6 +113,7 @@ export default class App extends Component {
   cleanData() {
     this.actData = [['Time','Kind','Intensity','Step']];
     this.battery = '';
+    this.stepData = '';
     this.forceUpdate();
   }
 
@@ -161,19 +155,40 @@ export default class App extends Component {
     });
   }
 
+  getInfo(){
+    this.getBatteryLevel();
+    this.getStepInfo();
+  }
+
   getBatteryLevel(){
     RNMiband.getBatteryLevel().then((data)=>{
       this.battery = data;
       console.log('app battery: '+this.battery);
       this.forceUpdate();
-    }); 
+    });
+  }
+
+  getStepInfo(){
+    RNMiband.getStepData().then((data)=>{
+      this.stepData = data;
+      console.log('app stepData: '+this.stepData);
+      this.forceUpdate();
+    });
+  }
+
+  findDevice(){
+    RNMiband.findDevice();
+  }
+
+  foundDevice(){
+    RNMiband.stopFindingDevice();
   }
 
   getActivityData(){
 
     var time    = new Date();
-    var hour    = 14;
-    var minute  = 30;
+    var hour    = 21;
+    var minute  = 0;
     time.setHours(hour);
     time.setMinutes(minute);
 
@@ -189,14 +204,14 @@ export default class App extends Component {
   getActivityDataRange(){
 
     var startDate  = new Date();
-    var startHour    = 14;
-    var startMinute  = 30;
+    var startHour    = 21;
+    var startMinute  = 0;
     startDate.setHours(startHour);
     startDate.setMinutes(startMinute);
 
     var endDate  = new Date();
-    var endHour    = 14;
-    var endMinute  = 40;
+    var endHour    = 21;
+    var endMinute  = 5;
     endDate.setHours(endHour);
     endDate.setMinutes(endMinute);
 
@@ -240,23 +255,28 @@ export default class App extends Component {
             }}
           />
         </ScrollView>
-        <View style={styles.twoView}>
-          <TouchableHighlight style={styles.buttonLeft} onPress={() => this.getBatteryLevel() }>
-            <Text style={{textAlign:'center'}}>Get Battery Level</Text>
+        <View style={styles.rowView}>
+          <TouchableHighlight style={styles.twoButtonLeft} onPress={() => this.getInfo() }>
+            <Text style={{textAlign:'center'}}>Get Info</Text>
           </TouchableHighlight>
-          <TouchableHighlight style={styles.buttonRight} onPress={() => this.disconnect() }>
+          <TouchableHighlight style={styles.twoButtonRight} onPress={() => this.disconnect() }>
             <Text style={{textAlign:'center'}}>Disconnect</Text>
           </TouchableHighlight>
         </View>
-        <View style={styles.twoView}>
+        <View style={styles.rowView}>
           <Text style={{flex:1,marginRight:10}}>Battery: {this.battery}</Text>
           <Text style={{flex:1,marginLeft:10}}>Connected: {this.connected?'Yes':'No'}</Text>
         </View>
-        <View style={styles.twoView}>
-          <TouchableHighlight style={styles.buttonLeft} onPress={() => this.getActivityData() }>
+        <View style={styles.rowView}>
+          <Text style={{flex:1,marginRight:10}}>Step: {this.stepData[0]}</Text>
+          <Text style={{flex:1,marginLeft:10,marginRight:10}}>Distance: {this.stepData[1]}</Text>
+          <Text style={{flex:1,marginLeft:10}}>Calories: {this.stepData[2]}</Text>
+        </View>
+        <View style={styles.rowView}>
+          <TouchableHighlight style={styles.twoButtonLeft} onPress={() => this.getActivityData() }>
             <Text style={{textAlign:'center'}}>Get Act Data</Text>
           </TouchableHighlight>
-          <TouchableHighlight style={styles.buttonRight} onPress={() => this.getActivityDataRange() }>
+          <TouchableHighlight style={styles.twoButtonRight} onPress={() => this.getActivityDataRange() }>
             <Text style={{textAlign:'center'}}>Get Act Data Range</Text>
           </TouchableHighlight>
         </View>
@@ -279,6 +299,14 @@ export default class App extends Component {
             </View>
           </ScrollView>
         </ScrollView>
+        <View style={styles.rowView}>
+          <TouchableHighlight style={styles.twoButtonLeft} onPress={() => this.findDevice() }>
+            <Text style={{textAlign:'center'}}>Find Device</Text>
+          </TouchableHighlight>
+          <TouchableHighlight style={styles.twoButtonRight} onPress={() => this.foundDevice() }>
+            <Text style={{textAlign:'center'}}>Found Device</Text>
+          </TouchableHighlight>
+        </View>
       </View>
     );
   }
@@ -300,21 +328,21 @@ const styles = StyleSheet.create({
   row: {
     margin: 10
   },
-  twoView: {
+  rowView: {
     marginTop: 0,
     margin: 20,
-    flexDirection: 'row',
+    flexDirection: 'row'
   },
-  buttonLeft: {
+  twoButtonLeft: {
     flex:1,
     padding:10, 
     backgroundColor:'#ccc',
-    marginRight: 10,
+    marginRight:10
   },
-  buttonRight: {
+  twoButtonRight: {
     flex:1,
     padding:10, 
     backgroundColor:'#ccc',
-    marginLeft: 10,
+    marginLeft:10
   }
 });
