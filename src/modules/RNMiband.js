@@ -314,7 +314,7 @@ class RNMiband{
     }
   }
 
-  stopFindingDevice(){
+  foundDevice(){
     this.finding = false;
   }
 
@@ -388,7 +388,8 @@ class RNMiband{
     
     this.finalTime = new Date();
     var head = [0x01,0x01];
-    var tail = [0x00,0x28]; // timezone * 4, Sydney = 10 * 4
+    //var tail = [0x00,0x28]; // timezone * 4, Sydney = 10 * 4 for no DST
+    var tail = [0x00,0x2c]; // timezone * 4, Sydney = 10 * 4 + 4 DST
     var time = startDate;
     var year    = time.getFullYear();
     var month   = time.getMonth() + 1;
@@ -452,7 +453,6 @@ class RNMiband{
         }
       },1000);
     });
-    
   }
 
   getActivityDataRange(startDate,endDate){

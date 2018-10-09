@@ -157,7 +157,7 @@ export default class App extends Component {
 
   getInfo(){
     this.getBatteryLevel();
-    this.getStepInfo();
+    this.getStepData();
   }
 
   getBatteryLevel(){
@@ -168,7 +168,7 @@ export default class App extends Component {
     });
   }
 
-  getStepInfo(){
+  getStepData(){
     RNMiband.getStepData().then((data)=>{
       this.stepData = data;
       console.log('app stepData: '+this.stepData);
@@ -181,14 +181,14 @@ export default class App extends Component {
   }
 
   foundDevice(){
-    RNMiband.stopFindingDevice();
+    RNMiband.foundDevice();
   }
 
   getActivityData(){
 
     var time    = new Date();
-    var hour    = 21;
-    var minute  = 0;
+    var hour    = 15;
+    var minute  = 50;
     time.setHours(hour);
     time.setMinutes(minute);
 
@@ -204,14 +204,14 @@ export default class App extends Component {
   getActivityDataRange(){
 
     var startDate  = new Date();
-    var startHour    = 21;
-    var startMinute  = 0;
+    var startHour    = 15;
+    var startMinute  = 40;
     startDate.setHours(startHour);
     startDate.setMinutes(startMinute);
 
     var endDate  = new Date();
-    var endHour    = 21;
-    var endMinute  = 5;
+    var endHour    = 15;
+    var endMinute  = 50;
     endDate.setHours(endHour);
     endDate.setMinutes(endMinute);
 
@@ -269,8 +269,8 @@ export default class App extends Component {
         </View>
         <View style={styles.rowView}>
           <Text style={{flex:1,marginRight:10}}>Step: {this.stepData[0]}</Text>
-          <Text style={{flex:1,marginLeft:10,marginRight:10}}>Distance: {this.stepData[1]}</Text>
-          <Text style={{flex:1,marginLeft:10}}>Calories: {this.stepData[2]}</Text>
+          <Text style={{flex:1.7,marginLeft:10,marginRight:10}}>Distance(m): {this.stepData[1]}</Text>
+          <Text style={{flex:1.4,marginLeft:10}}>Calories: {this.stepData[2]}</Text>
         </View>
         <View style={styles.rowView}>
           <TouchableHighlight style={styles.twoButtonLeft} onPress={() => this.getActivityData() }>
