@@ -156,8 +156,17 @@ export default class App extends Component {
   }
 
   getInfo(){
-    this.getBatteryLevel();
-    this.getStepData();
+    RNMiband.getBatteryLevel().then((data)=>{
+      this.battery = data;
+      console.log('app battery: '+this.battery);
+      this.forceUpdate();
+    }).then(()=>{
+      RNMiband.getStepData().then((data)=>{
+        this.stepData = data;
+        console.log('app stepData: '+this.stepData);
+        this.forceUpdate();
+      });
+    });
   }
 
   getBatteryLevel(){
@@ -187,8 +196,8 @@ export default class App extends Component {
   getActivityData(){
 
     var time    = new Date();
-    var hour    = 15;
-    var minute  = 50;
+    var hour    = 17;
+    var minute  = 0;
     time.setHours(hour);
     time.setMinutes(minute);
 
@@ -204,14 +213,14 @@ export default class App extends Component {
   getActivityDataRange(){
 
     var startDate  = new Date();
-    var startHour    = 15;
-    var startMinute  = 40;
+    var startHour    = 16;
+    var startMinute  = 50;
     startDate.setHours(startHour);
     startDate.setMinutes(startMinute);
 
     var endDate  = new Date();
-    var endHour    = 15;
-    var endMinute  = 50;
+    var endHour    = 17;
+    var endMinute  = 0;
     endDate.setHours(endHour);
     endDate.setMinutes(endMinute);
 
